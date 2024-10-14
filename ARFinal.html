@@ -163,9 +163,9 @@
     </div>
     <script src="arcamera.js" type="text/javascript"></script>
     <script src="wtracker.js" type="text/javascript"></script>
-    <script src="Build/build.loader.js"></script>
-    <!-- <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-    <script>eruda.init();</script> -->
+    <script src="Build/YugaBaycAR.loader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+    <script>eruda.init();</script>
 
     <script>
         var unityCanvas = document.querySelector("#unity-canvas");
@@ -194,9 +194,9 @@
 
             document.getElementById('startARDiv').style.display = 'none';
             createUnityInstance(document.querySelector("#unity-canvas"), {
-                dataUrl: "Build/build.data.unityweb",
-                frameworkUrl: "Build/build.framework.js.unityweb",
-                codeUrl: "Build/build.wasm.unityweb",
+                dataUrl: "Build/YugaBaycAR.data.unityweb",
+                frameworkUrl: "Build/YugaBaycAR.framework.js.unityweb",
+                codeUrl: "Build/YugaBaycAR.wasm.unityweb",
                 streamingAssetsUrl: "StreamingAssets",
                 companyName: "DefaultCompany",
                 productName: "My project",
@@ -239,7 +239,7 @@
                             cleanedObject.Earring = ""
                             cleanedObject.Eyes = ""
                             cleanedObject.Flipflop = ""
-                            cleanedObject.Fur = "Murtis"
+                            cleanedObject.Fur = nftId
                             cleanedObject.Hat = ""
                             cleanedObject.Mouth = ""
                             cleanedObject.Unshaven = ""
@@ -249,20 +249,27 @@
                         console.log(cleanedObject, product, "asdaoschnsaoijsaiodsdsaiodjsidjsidojsdiojsdios");
                         delete cleanedObject.ID;
                         cleanedObject.Background = "";
-                        if (product) {
+                        if (product && collection !== "jimmy") {
                             window.unityInstance.SendMessage(
                                 "Manager",
                                 "LoadProduct",
                                 product
                             );
                         }
-                        window.unityInstance.SendMessage(
-                            "Manager",
-                            "ReceiveJsonValues",
-                            JSON.stringify({
-                                ...cleanedObject,
-                            })
-                        );
+                        if (collection === "jimmy") {
+                            window.unityInstance.SendMessage(
+                                "Manager",
+                                "LoadJimmy"
+                            );
+                        } else {
+                            window.unityInstance.SendMessage(
+                                "Manager",
+                                "ReceiveJsonValues",
+                                JSON.stringify({
+                                    ...cleanedObject,
+                                })
+                            );
+                        }
                         const videoBtn = document.getElementById('videoButton');
                         videoBtn.style.display = "block";
                         const resetBtn = document.getElementById('resetBtn');
