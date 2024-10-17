@@ -164,8 +164,8 @@
     <script src="arcamera.js" type="text/javascript"></script>
     <script src="wtracker.js" type="text/javascript"></script>
     <script src="Build/YugaBaycAR.loader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-    <script>eruda.init();</script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+    <script>eruda.init();</script> -->
 
     <script>
         var unityCanvas = document.querySelector("#unity-canvas");
@@ -188,7 +188,31 @@
         var canvas = document.querySelector("#unity-canvas");
         var loadingBar = document.querySelector("#unity-loading-bar");
         var progressBarFull = document.querySelector("#unity-progress-bar-full");
-        function StartAR() {
+        async function StartAR() {
+            const search = window.location.search.split("&")
+            const collection = search[0].slice(12)
+            const address = search[1].slice(8)
+            const product = search[2].slice(8)?.replace("%20", " ")?.replace("@", "#")
+            const id = search[3].slice(3)
+            const auth = await fetch(
+                `https://bayccollection.ue.r.appspot.com/v1/getUidNft`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    address,
+                    id,
+                    collection
+                })
+            }
+            )
+
+            const authNft = await auth?.json()
+            if (!authNft?.id?.id) {
+                return alert("Unauthorized Access")
+            }
+
             canvas.style.width = window.innerWidth + "px";
             canvas.style.height = window.innerHeight + "px";
 
@@ -208,12 +232,8 @@
                 (progress) => {
                     progressBarFull.style.width = 100 * progress + "%";
                 }
-            ).then((unityInstance) => {
+            ).then(async (unityInstance) => {
                 window.unityInstance = unityInstance;
-                const search = window.location.search.split("&")
-                const collection = search[0].slice(12)
-                const nftId = search[1].slice(6)
-                const product = search[2].slice(8)?.replace("%20", " ")?.replace("@", "#")
 
                 const cleanJsonValues = (singleObject) => {
                     const cleanedObject = {};
@@ -231,7 +251,7 @@
                 )
                     .then((res) => res.json())
                     .then((metaArray) => {
-                        const selectedJson = metaArray.find((element) => element.ID == nftId);
+                        const selectedJson = metaArray.find((element) => element.ID == authNft?.id?.id);
 
                         const cleanedObject = cleanJsonValues(selectedJson);
                         if (collection === "mutant-ape-yacht-club") {
@@ -239,17 +259,17 @@
                             cleanedObject.Earring = ""
                             cleanedObject.Eyes = ""
                             cleanedObject.Flipflop = ""
-                            cleanedObject.Fur = nftId
+                            cleanedObject.Fur = authNft?.id?.id
                             cleanedObject.Hat = ""
                             cleanedObject.Mouth = ""
                             cleanedObject.Unshaven = ""
                             cleanedObject.Head = ""
                             cleanedObject.ID = ""
                         }
-                        console.log(cleanedObject, product, "asdaoschnsaoijsaiodsdsaiodjsidjsidojsdiojsdios");
+                        console.log(cleanedObject, product, authNft?.id?.id, "asdaoschnsaoijsaiodsdsaiodjsidjsidojsdiojsdios");
                         delete cleanedObject.ID;
                         cleanedObject.Background = "";
-                        if (product && collection !== "jimmy") {
+                        if (product) {
                             window.unityInstance.SendMessage(
                                 "Manager",
                                 "LoadProduct",
@@ -276,12 +296,9 @@
                         resetBtn.style.display = "block";
                         const imgBtn = document.getElementById('screenshotButton');
                         imgBtn.style.display = "block";
-
-
                     })
                     .catch((e) => {
                         console.log(e, "dadserrrorrr");
-
                     })
                 RequestWebcam();
                 loadingBar.style.display = "none";
