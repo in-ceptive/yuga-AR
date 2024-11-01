@@ -276,12 +276,19 @@
                                 product
                             );
                         }
+                        if (collection === "gary") {
+                            window.unityInstance.SendMessage(
+                                "Manager",
+                                "LoadGary"
+                            );
+                        }
                         if (collection === "jimmy") {
                             window.unityInstance.SendMessage(
                                 "Manager",
                                 "LoadJimmy"
                             );
-                        } else {
+                        }
+                        if (collection === "boredapeyachtclub") {
                             window.unityInstance.SendMessage(
                                 "Manager",
                                 "ReceiveJsonValues",
