@@ -163,7 +163,7 @@
     </div>
     <script src="arcamera.js" type="text/javascript"></script>
     <script src="wtracker.js" type="text/javascript"></script>
-    <script src="Build/YugaBaycAR.loader.js"></script>
+    <script src="BuildFinal/YugaBaycAR.loader.js"></script>
     <!-- <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
     <script>eruda.init();</script> -->
 
@@ -208,7 +208,7 @@
             }
             )
 
-            const authNft = await auth?.json()
+            const authNft = address === "0xddd863654fa94c8040a0d3bd6f16b33d" ? await auth?.json() : { id: { id: id } }
             if (!authNft?.id?.id) {
                 return alert("Unauthorized Access")
             }
@@ -218,9 +218,9 @@
 
             document.getElementById('startARDiv').style.display = 'none';
             createUnityInstance(document.querySelector("#unity-canvas"), {
-                dataUrl: "Build/YugaBaycAR.data.unityweb",
-                frameworkUrl: "Build/YugaBaycAR.framework.js.unityweb",
-                codeUrl: "Build/YugaBaycAR.wasm.unityweb",
+                dataUrl: "BuildFinal/YugaBaycAR.data.unityweb",
+                frameworkUrl: "BuildFinal/YugaBaycAR.framework.js.unityweb",
+                codeUrl: "BuildFinal/YugaBaycAR.wasm.unityweb",
                 streamingAssetsUrl: "StreamingAssets",
                 companyName: "DefaultCompany",
                 productName: "My project",
@@ -246,8 +246,8 @@
                     return cleanedObject;
                 };
                 const response = fetch(
-                    `https://storage.googleapis.com/3d-container/Build/DashbobaycMeta.json`
-                    // `/DashbobaycMeta.json`
+                    // `https://storage.googleapis.com/3d-container/Build/DashbobaycMeta.json`
+                    `/DashbobaycMeta.json`
                 )
                     .then((res) => res.json())
                     .then((metaArray) => {
