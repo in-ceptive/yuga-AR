@@ -6,7 +6,7 @@
     <meta name="viewport"
         content='width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes'>
     <title>Unity WebGL Player | My project</title>
-    <link rel="stylesheet" href="TemplateData/style.css">
+    <link rel="stylesheet" href="https://storage.googleapis.com/3d-container/yuga/ARBuild/TemplateData/style.css">
 
     <style>
         html {
@@ -194,6 +194,7 @@
             const address = search[1].slice(8)
             const product = search[2].slice(8)?.replace("%20", " ")?.replace("@", "#")
             const id = search[3].slice(3)
+            RequestWebcam();
             const auth = await fetch(
                 `https://bayccollection.ue.r.appspot.com/v1/getUidNft`, {
                 method: "POST",
@@ -246,15 +247,17 @@
                     return cleanedObject;
                 };
                 const response = fetch(
-                    // `https://storage.googleapis.com/3d-container/Build/DashbobaycMeta.json`
-                    `/DashbobaycMeta.json`
+                    `https://storage.googleapis.com/3d-container/yuga/ARBuild/DashbobaycMeta.json`
+                    // `/DashbobaycMeta.json`
                 )
                     .then((res) => res.json())
                     .then((metaArray) => {
                         const selectedJson = metaArray.find((element) => element.ID == authNft?.id?.id);
 
                         const cleanedObject = cleanJsonValues(selectedJson);
+
                         if (collection === "mutant-ape-yacht-club") {
+                            console.log(cleanedObject, product, authNft?.id?.id, "asdaoschnsaoijsaiodsdsaiodjsidjsidojsdiojsdios");
                             cleanedObject.Clothes = ""
                             cleanedObject.Earring = ""
                             cleanedObject.Eyes = ""
@@ -265,8 +268,14 @@
                             cleanedObject.Unshaven = ""
                             cleanedObject.Head = ""
                             cleanedObject.ID = ""
+                            window.unityInstance.SendMessage(
+                                "Manager",
+                                "ReceiveJsonValues",
+                                JSON.stringify({
+                                    ...cleanedObject,
+                                })
+                            );
                         }
-                        console.log(cleanedObject, product, authNft?.id?.id, "asdaoschnsaoijsaiodsdsaiodjsidjsidojsdiojsdios");
                         delete cleanedObject.ID;
                         cleanedObject.Background = "";
                         if (product) {
@@ -288,6 +297,7 @@
                                 "LoadJimmy"
                             );
                         }
+
                         if (collection === "boredapeyachtclub") {
                             window.unityInstance.SendMessage(
                                 "Manager",
@@ -307,7 +317,7 @@
                     .catch((e) => {
                         console.log(e, "dadserrrorrr");
                     })
-                RequestWebcam();
+
                 loadingBar.style.display = "none";
             });
             StartMotionSensors();
