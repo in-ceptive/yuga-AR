@@ -1,25 +1,50 @@
 <!DOCTYPE html>
-<html>
+<html lang="en-us">
 
 <head>
     <meta charset="utf-8">
-    <meta name="viewport"
-        content='width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes'>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Unity WebGL Player | My project</title>
-    <link rel="stylesheet" href="https://storage.googleapis.com/3d-container/yuga/ARBuild/TemplateData/style.css">
+    <link rel="shortcut icon" href="TemplateData/favicon.ico">
+    <link rel="stylesheet" href="TemplateData/style.css">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap" rel="stylesheet">
 
     <style>
-        html {
-            height: -webkit-fill-available;
+        body {
+            font-family: 'Roboto', sans-serif;
+            letter-spacing: 0.05em;
+            font-size: max(2vw, 2vh);
+            color: white
         }
 
-        body {
-            margin: 0;
-            padding: 0;
-            min-height: 100vh;
-            min-height: -webkit-fill-available;
-            width: 100vw;
-            overflow: hidden;
+
+
+        button {
+            height: max(5vw, 5vh);
+            font-size: max(2vw, 2vh);
+            font-weight: bold;
+            border-radius: max(1.5vw, 1.5vh);
+            padding-left: max(5vw, 5vh);
+            padding-right: max(5vw, 5vh);
+            border: 0;
+            color: #62a7fe;
+            background: #3d3d3d;
+            transition: 0.1s;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+
+        button:hover {
+            filter: brightness(1.15)
+        }
+
+        button:active {
+            transform: scale(0.95);
+            filter: brightness(0.85)
         }
 
         .ctaDiv {
@@ -32,8 +57,24 @@
             right: 0;
             top: 0;
             bottom: 0;
-            background: #fffa;
+            background: #2f2e32aa;
             z-index: 99;
+            transition: 0.5s;
+
+        }
+
+        .popup {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 14px;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
         }
 
         .blinking {
@@ -109,92 +150,167 @@
 </head>
 
 <body>
+    <!--IMAGETARGETS-->
+
     <video id="webcam-video" muted autoplay playsinline style="width:1px;position:absolute"></video>
-    <div id="startARDiv" class="ctaDiv">
-        <select id="chooseCamSel" style="display: none;" onchange="SelectCam()"></select>
-        <p style="text-align: center; width:60vw">This augmented reality experience requires access to your device's
-            camera and motion sensors</p>
-        <button id="startARButton" style="display:none" onclick="StartAR()">ALLOW ACCESS</button>
+    <canvas id="video-canvas" style="width:100%; height:100%; object-fit:cover; position:absolute"></canvas>
+    <div id="startARDiv" class="ctaDiv" style="background: #2f2e32">
+        <select id="chooseCamSel"
+            style="visibility: hidden; background: transparent; border: .05vh solid white; border-radius: max(0.5vw, 0.5vh); color:white; font-size: max(1.5vw, 1.5vh); position: absolute; bottom: 80px"
+            onchange="SelectCam()"></select>
+        <p style="text-align: center; width:min(60vw, 60vh);">The AR experience requires access to your
+            device's camera and motion sensors</p>
+        <button id="startARButton" onclick="StartAR()" style="visibility: hidden">ALLOW ACCESS</button>
+        <br><br><br>
     </div>
-    <div id="screenshotDiv" style="display: none;" class="ctaDiv">
+    <div id="screenshotDiv" style="visibility: hidden; opacity: 0;" class="ctaDiv">
         <div
-            style="position:relative; background-color:white; padding:10px; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.3), 0 6px 20px 0 rgba(0, 0, 0, 0.25);">
+            style="position:relative; background-color:#2c2b2f; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.3), 0 6px 20px 0 rgba(0, 0, 0, 0.25); border-radius: max(1.5vh, 1.5vw); text-align: center; overflow: hidden">
             <img id="screenshotImg" src="" alt="screenshot" style="width:80vw; height:80vh">
-            <button onclick="document.getElementById('screenshotDiv').style.display = 'none';"
-                style="position:absolute; transform:translateY(-100%); right:0; top:0">Close</button>
+            <button onclick="HideScreenshot()"
+                style="position:absolute;right: max(1vw, 1vh);top: max(1vw, 1vh);background: #3d3d3d77; width: max(4vw, 4vh); height: max(4vw, 4vh);padding: 0;border-radius: 100vw; display: flex;align-items: center;justify-content: center;">
+                <svg width="max(2.5vw,2.5vh)" height="max(2.5vw,2.5vh)" viewBox="0 0 24 24">
+                    <line x1="3" y1="3" x2="21" y2="21" stroke="#999" stroke-width="2.5"></line>
+                    <line x1="3" y1="21" x2="21" y2="3" stroke="#999" stroke-width="2.5"></line>
+                </svg>
+            </button>
+            <p style="font-size: max(1vw, 1vh); color: #fff6">Press and hold to save or share this screenshot</p>
         </div>
     </div>
-    <button id="screenshotButton"
-        style="display: none; width:40px; height: 30px; position: fixed; top: 10px; left: 70px; z-index: 100;">
-        📷
-    </button>
-
-    <!-- Video Record Button -->
-    <button id="videoButton" class=""
-        style="display: none; width:40px; height: 30px; position: fixed; top: 10px; left: 10px; z-index: 100;">
-        🎥
-    </button>
-    <button id="resetBtn" class=""
-        style="display: none;  width:60px; height: 30px; position: fixed; top: 10px; right: 10px; z-index: 100;">
-        Reset
-    </button>
-    <div id="recButton"
-        style=" padding: 2px; border-radius: 10px; justify-content: center; display: none; background: gainsboro; align-items: center; width:70px; height: 30px; position: fixed; top: 60px; left: 10px; z-index: 100;">
-        <svg height="20" width="20" class="blinking">
-            <circle cx="10" cy="10" r="10" fill="red" />
-        </svg>
-        REC
+    <div id="confirmUrlDiv" style="visibility: hidden; opacity: 0;" class="ctaDiv">
+        <div style="position:relative; background-color:#2c2b2f; padding:10px; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.3), 0 6px 20px 0 rgba(0, 0, 0, 0.25); width: min(80vw,80vh); display:flex; flex-direction: column; align-items: center; border-radius: 1.5vh;
+">
+            <p id="confirmUrlText" style="text-align: center; width:80%; overflow: hidden; text-overflow: ellipsis;">Are
+                you sure you want to visit url.com?</p>
+            <div style="width: 100%">
+                <button style="width: 100%; margin-bottom: 15px;"
+                    onclick="window.open(newUrlString, '_blank').focus(); HideConfirmUrl()">VISIT SITE</button>
+                <button style="width: 100%" onclick="HideConfirmUrl()">GO BACK</button>
+            </div>
+        </div>
     </div>
-    <video id="webcam-video" muted autoplay playsinline style="width:1px;position:absolute"></video>
-
-    <div id="errorDiv" class="ctaDiv" style="display: none; background:#aaa">
-        <p id="errorText" style="text-align: center; width:60vw; color:white"></p>
+    <div id="errorDiv" class="ctaDiv" style="visibility: hidden; opacity: 0; background-color:#2c2b2f">
+        <p id="errorText" style="text-align: center; width:60vw; color:#7f3f3f; font-size: max(3vw, 3vh);"></p>
     </div>
-    <div id="unity-container" class="unity-mobile">
-        <canvas id="unity-canvas"
-            style="width: calc(100 - 2px); height: calc(100% - 2px); background: #0000; z-index: -99;"></canvas>
+    <div id="unity-container">
+        <canvas id="unity-canvas" width=960 height=600 tabindex="-1"></canvas>
         <div id="unity-loading-bar">
             <div id="unity-logo"></div>
             <div id="unity-progress-bar-empty">
                 <div id="unity-progress-bar-full"></div>
             </div>
         </div>
-        <canvas id="video-canvas"></canvas>
+        <div id="unity-warning"> </div>
+        <button id="screenshotButton"
+            style="display: none; align-items: center;justify-content: center; width:30px;height: 30px; position: fixed; top: 10px; left: 100px; z-index: 100;">
+            📷
+        </button>
+
+        <!-- Video Record Button -->
+        <button id="videoButton" class=""
+            style="display: none; align-items: center;justify-content: center; width:30px; height: 30px; position: fixed; top: 10px; left: 10px; z-index: 100;">
+            🎥
+        </button>
+        <button id="resetBtn" class=""
+            style="display: none; align-items: center;justify-content: center; width:60px; height: 30px; position: fixed; top: 10px; right: 10px; z-index: 100;">
+            Reset
+        </button>
+        <div id="recButton"
+            style=" padding: 2px; font-size: 10px; border-radius: 10px; color: #000; justify-content: center; display: none; background: gainsboro; align-items: center; width:110px; height: 30px; position: fixed; top: 60px; left: 10px; z-index: 100;">
+            <svg height="20" width="20" class="blinking">
+                <circle cx="10" cy="10" r="10" fill="red" />
+            </svg>
+            REC (10 sec)
+        </div>
+    </div>
+    <div id="video-popup" style="display: none;" class="popup">
+        Creating video...
     </div>
     <script src="arcamera.js" type="text/javascript"></script>
     <script src="wtracker.js" type="text/javascript"></script>
-    <script src="BuildFinal/YugaBaycAR.loader.js"></script>
     <!-- <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
     <script>eruda.init();</script> -->
 
     <script>
-        var unityCanvas = document.querySelector("#unity-canvas");
-        var videoCanvas = document.querySelector("#video-canvas");
-        window.arCamera = new ARCamera(unityCanvas, videoCanvas);
-        window.wTracker = new WorldTracker(arCamera);
-        wTracker.initialize()
-            .then(async () => {
-                console.log("World tracker initialized!");
-                await LoadWebcams();
-                document.getElementById("startARButton").style.display = "block";
-            })
-            .catch(error => {
-                console.error("Failed to initialize world tracker. Are you missing opencv.js?");
-                ShowError("Failed to initialize the experience.");
+        // Disable double-tap to zoom
+        document.addEventListener('touchstart', function (event) {
+            if (event.touches.length > 1) {
+                event.preventDefault();
+            }
+        }, { passive: false });
 
-            });
+        // Disable pinch to zoom
+        document.addEventListener('gesturestart', function (event) {
+            event.preventDefault();
+        });
+
+        var initialize = async () => {
+            var unityCanvas = document.querySelector("#unity-canvas");
+            var videoCanvas = document.querySelector("#video-canvas");
+            window.arCamera = new ARCamera(unityCanvas, videoCanvas);
+            window.wTracker = new WorldTracker(arCamera);
+            try {
+                await window.wTracker.initialize("./opencv.js");
+                console.log("World tracker initialized!");
+            }
+            catch {
+                console.error("Failed to initialize world tracker. Are you missing opencv.js? " + error);
+                ShowError("Failed to initialize the World Tracker.");
+                return;
+            }
+
+            await LoadWebcams();
+            document.getElementById("startARButton").style.visibility = "visible";
+
+            window.camPermissionsGranted = await IsCameraPermissionGranted();
+            window.motionPermissionsGranted = await IsMotionSensorPermissionGranted();
+        }
+
+        initialize();
+
+        window.addEventListener("load", function () {
+            if ("serviceWorker" in navigator) {
+                navigator.serviceWorker.register("ServiceWorker.js");
+            }
+        });
 
         var container = document.querySelector("#unity-container");
         var canvas = document.querySelector("#unity-canvas");
         var loadingBar = document.querySelector("#unity-loading-bar");
         var progressBarFull = document.querySelector("#unity-progress-bar-full");
+        var warningBanner = document.querySelector("#unity-warning");
+
+        // Shows a temporary message banner/ribbon for a few seconds, or
+        // a permanent error message on top of the canvas if type=='error'.
+        // If type=='warning', a yellow highlight color is used.
+        // Modify or remove this function to customize the visually presented
+        // way that non-critical warnings and error messages are presented to the
+        // user.
+        function unityShowBanner(msg, type) {
+            function updateBannerVisibility() {
+                warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
+            }
+            var div = document.createElement('div');
+            div.innerHTML = msg;
+            warningBanner.appendChild(div);
+            if (type == 'error') div.style = 'background: red; padding: 10px;';
+            else {
+                if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
+                setTimeout(function () {
+                    warningBanner.removeChild(div);
+                    updateBannerVisibility();
+                }, 5000);
+            }
+            updateBannerVisibility();
+        }
+
         async function StartAR() {
+            if (window.arStarted) return;
             const search = window.location.search.split("&")
             const collection = search[0].slice(12)
             const address = search[1].slice(8)
             const product = search[2].slice(8)?.replace("%20", " ")?.replace("@", "#")
             const id = search[3].slice(3)
-            RequestWebcam();
             const auth = await fetch(
                 `https://bayccollection.ue.r.appspot.com/v1/getUidNft`, {
                 method: "POST",
@@ -209,127 +325,168 @@
             }
             )
 
-            const authNft = address === "0xddd863654fa94c8040a0d3bd6f16b33d" ? await auth?.json() : { id: { id: id } }
+            const authNft = await auth?.json()
+            // const authNft = { id: { id: 1254 } }
             if (!authNft?.id?.id) {
                 return alert("Unauthorized Access")
             }
 
-            canvas.style.width = window.innerWidth + "px";
-            canvas.style.height = window.innerHeight + "px";
+            window.arStarted = true;
 
-            document.getElementById('startARDiv').style.display = 'none';
-            createUnityInstance(document.querySelector("#unity-canvas"), {
-                dataUrl: "BuildFinal/YugaBaycAR.data.unityweb",
-                frameworkUrl: "BuildFinal/YugaBaycAR.framework.js.unityweb",
-                codeUrl: "BuildFinal/YugaBaycAR.wasm.unityweb",
+            var startARDiv = document.querySelector("#startARDiv");
+            startARDiv.style.opacity = 0;
+            setTimeout(() => {
+                startARDiv.style.visibility = "hidden";
+                startARDiv.style.display = "none";
+            }, 500);
+
+            var buildUrl = "Build";
+            var loaderUrl = buildUrl + "/YugaBaycAR.loader.js";
+            var config = {
+                dataUrl: buildUrl + "/YugaBaycAR.data.unityweb",
+                frameworkUrl: buildUrl + "/YugaBaycAR.framework.js.unityweb",
+                codeUrl: buildUrl + "/YugaBaycAR.wasm.unityweb",
                 streamingAssetsUrl: "StreamingAssets",
                 companyName: "DefaultCompany",
                 productName: "My project",
-                productVersion: "0.1.0",
                 webglContextAttributes: { "preserveDrawingBuffer": true },
-                // matchWebGLToCanvasSize: false, // Uncomment this to separately control WebGL canvas render size and DOM element size.
-                // devicePixelRatio: 1, // Uncomment this to override low DPI rendering on high DPI displays.
-            },
-                (progress) => {
-                    progressBarFull.style.width = 100 * progress + "%";
-                }
-            ).then(async (unityInstance) => {
-                window.unityInstance = unityInstance;
+                productVersion: "0.1.0",
+                showBanner: unityShowBanner,
+            };
 
-                const cleanJsonValues = (singleObject) => {
-                    const cleanedObject = {};
-                    for (const key in singleObject) {
-                        if (singleObject.hasOwnProperty(key)) {
-                            const value = singleObject[key].replace(/\s+/g, " ").trim();
-                            cleanedObject[key] = value;
-                        }
-                    }
-                    return cleanedObject;
-                };
-                const response = fetch(
-                    `https://storage.googleapis.com/3d-container/yuga/ARBuild/DashbobaycMeta.json`
-                    // `/DashbobaycMeta.json`
-                )
-                    .then((res) => res.json())
-                    .then((metaArray) => {
-                        const selectedJson = metaArray.find((element) => element.ID == authNft?.id?.id);
+            // By default Unity keeps WebGL canvas render target size matched with
+            // the DOM size of the canvas element (scaled by window.devicePixelRatio)
+            // Set this to false if you want to decouple this synchronization from
+            // happening inside the engine, and you would instead like to size up
+            // the canvas DOM size and WebGL render target sizes yourself.
+            // config.matchWebGLToCanvasSize = false;
 
-                        const cleanedObject = cleanJsonValues(selectedJson);
+            if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+                // Mobile device style: fill the whole browser client area with the game canvas:
+                var meta = document.createElement('meta');
+                meta.name = 'viewport';
+                meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+                document.getElementsByTagName('head')[0].appendChild(meta);
+            }
 
-                        if (collection === "mutant-ape-yacht-club") {
-                            console.log(cleanedObject, product, authNft?.id?.id, "asdaoschnsaoijsaiodsdsaiodjsidjsidojsdiojsdios");
-                            cleanedObject.Clothes = ""
-                            cleanedObject.Earring = ""
-                            cleanedObject.Eyes = ""
-                            cleanedObject.Flipflop = ""
-                            cleanedObject.Fur = authNft?.id?.id
-                            cleanedObject.Hat = ""
-                            cleanedObject.Mouth = ""
-                            cleanedObject.Unshaven = ""
-                            cleanedObject.Head = ""
-                            cleanedObject.ID = ""
-                            window.unityInstance.SendMessage(
-                                "Manager",
-                                "ReceiveJsonValues",
-                                JSON.stringify({
-                                    ...cleanedObject,
-                                })
-                            );
-                        }
-                        delete cleanedObject.ID;
-                        cleanedObject.Background = "";
-                        if (product) {
-                            window.unityInstance.SendMessage(
-                                "Manager",
-                                "LoadProduct",
-                                product
-                            );
-                        }
-                        if (collection === "gary") {
-                            window.unityInstance.SendMessage(
-                                "Manager",
-                                "LoadGary"
-                            );
-                        }
-                        if (collection === "jimmy") {
-                            window.unityInstance.SendMessage(
-                                "Manager",
-                                "LoadJimmy"
-                            );
-                        }
-
-                        if (collection === "boredapeyachtclub") {
-                            window.unityInstance.SendMessage(
-                                "Manager",
-                                "ReceiveJsonValues",
-                                JSON.stringify({
-                                    ...cleanedObject,
-                                })
-                            );
-                        }
-                        const videoBtn = document.getElementById('videoButton');
-                        videoBtn.style.display = "block";
-                        const resetBtn = document.getElementById('resetBtn');
-                        resetBtn.style.display = "block";
-                        const imgBtn = document.getElementById('screenshotButton');
-                        imgBtn.style.display = "block";
-                    })
-                    .catch((e) => {
-                        console.log(e, "dadserrrorrr");
-                    })
-
-                loadingBar.style.display = "none";
-            });
-            StartMotionSensors();
             loadingBar.style.display = "block";
+
+            var script = document.createElement("script");
+            script.src = loaderUrl;
+            script.onload = () => {
+                createUnityInstance(canvas, config, (progress) => {
+                    progressBarFull.style.width = 100 * progress + "%";
+                }).then((unityInstance) => {
+                    loadingBar.style.display = "none";
+
+                    window.unityInstance = unityInstance;
+                    const cleanJsonValues = (singleObject) => {
+                        const cleanedObject = {};
+                        for (const key in singleObject) {
+                            if (singleObject.hasOwnProperty(key)) {
+                                const value = singleObject[key].replace(/\s+/g, " ").trim();
+                                cleanedObject[key] = value;
+                            }
+                        }
+                        return cleanedObject;
+                    };
+                    const response = fetch(
+                        `https://storage.googleapis.com/3d-container/yuga/ARBuild/DashbobaycMeta.json`
+                        // `/DashbobaycMeta.json`
+                    )
+                        .then((res) => res.json())
+                        .then((metaArray) => {
+                            const selectedJson = metaArray.find((element) => element.ID == authNft?.id?.id);
+
+                            const cleanedObject = cleanJsonValues(selectedJson);
+
+                            console.log(cleanedObject, product, authNft?.id?.id, "asdaoschnsaoijsaiodsdsaiodjsidjsidojsdiojsdios");
+                            if (collection === "mutant-ape-yacht-club") {
+                                cleanedObject.Clothes = ""
+                                cleanedObject.Earring = ""
+                                cleanedObject.Eyes = ""
+                                cleanedObject.Flipflop = ""
+                                cleanedObject.Fur = authNft?.id?.id
+                                cleanedObject.Hat = ""
+                                cleanedObject.Mouth = ""
+                                cleanedObject.Unshaven = ""
+                                cleanedObject.Head = ""
+                                cleanedObject.ID = ""
+                                window.unityInstance.SendMessage(
+                                    "Manager",
+                                    "ReceiveJsonValues",
+                                    JSON.stringify({
+                                        ...cleanedObject,
+                                    })
+                                );
+                            }
+                            delete cleanedObject.ID;
+                            cleanedObject.Background = "";
+                            if (product) {
+                                window.unityInstance.SendMessage(
+                                    "Manager",
+                                    "LoadProduct",
+                                    product
+                                );
+                            }
+                            if (collection === "gary") {
+                                window.unityInstance.SendMessage(
+                                    "Manager",
+                                    "LoadGary"
+                                );
+                            }
+                            if (collection === "jimmy") {
+                                window.unityInstance.SendMessage(
+                                    "Manager",
+                                    "LoadJimmy"
+                                );
+                            }
+
+                            if (collection === "boredapeyachtclub") {
+                                window.unityInstance.SendMessage(
+                                    "Manager",
+                                    "ReceiveJsonValues",
+                                    JSON.stringify({
+                                        ...cleanedObject,
+                                    })
+                                );
+                            }
+                            const videoBtn = document.getElementById('videoButton');
+                            videoBtn.style.display = "flex";
+                            const resetBtn = document.getElementById('resetBtn');
+                            resetBtn.style.display = "flex";
+                            const imgBtn = document.getElementById('screenshotButton');
+                            imgBtn.style.display = "flex";
+                        })
+                        .catch((e) => {
+                            console.log(e, "dadserrrorrr");
+                        })
+                    if (!window.camPermissionsGranted) {
+                        RequestWebcam();
+                    }
+                }).catch((message) => {
+                    alert(message);
+                });
+                // if(!window.motionPermissionsGranted){
+                StartMotionSensors();
+                // }
+
+                //Call Start GPS here --> StartGPS();
+
+            };
+            document.body.appendChild(script);
         }
+
+        //Set Facing Mode here ('environment', 'user', '')
+        window.unityFacingMode = "environment"
 
         window.WEBCAM_SETTINGS = {
             video: {
-                facingMode: "environment",
+                facingMode: unityFacingMode,
             },
             audio: false
         };
+
         window.requestingForPermissions = false;
         async function RequestWebcam() {
             window.requestingForPermissions = true;
@@ -337,6 +494,9 @@
                 window.webcamStream = await navigator.mediaDevices.getUserMedia(window.WEBCAM_SETTINGS);
                 console.log("Webcam access granted");
                 requestingForPermissions = false;
+
+                // Immediately stop the stream to release the camera
+                StopWebcam();
             }
             catch (err) {
                 //user denied camera permission - show error panel
@@ -345,8 +505,16 @@
                 window.requestingForPermissions = false;
             }
         }
+
+        function StopWebcam() {
+            console.log("stopping camera");
+            window.webcamStream.getTracks().forEach(track => track.stop());
+        }
+
         async function StartWebcam() {
             console.log("StartWebcam")
+
+            window.webcamStream = await navigator.mediaDevices.getUserMedia(window.WEBCAM_SETTINGS);
 
             while (window.requestingForPermissions) {
                 // Wait until requestingForPermissions becomes true.
@@ -364,6 +532,14 @@
                     console.log("Webcam started successfully");
 
                     window.unityInstance.SendMessage('ARCamera', 'OnStartWebcamSuccess');
+
+
+
+                    //replace background transparency
+                    const canvas = document.querySelector("#unity-canvas");
+                    let bgColor = window.getComputedStyle(canvas).backgroundColor;
+                    canvas.style.background = bgColor.replace("rgb", "rgba").replace(")", ", 0)");
+
                 }
                 catch (err) {
                     console.error("Webcam failed to start - ", err);
@@ -377,20 +553,36 @@
         }
 
         async function LoadWebcams() {
-            let backCams = [];
+            let camDevices = [];
+            // let backCams = [];
             let devices = await navigator.mediaDevices.enumerateDevices();
+            var ctr = 0;
             devices.forEach(mediaDevice => {
-                if (mediaDevice.kind === 'videoinput' && !mediaDevice.label.includes('facing front')) {
-                    backCams.push(mediaDevice);
+                if (mediaDevice.kind === 'videoinput') {
+
+                    if (window.unityFacingMode == 'environment' && !mediaDevice.label.includes('facing front')) {
+                        //back cam only
+                        camDevices.push(mediaDevice);
+                    }
+                    else if (window.unityFacingMode == 'user' && mediaDevice.label.includes('facing front')) {
+                        //front cam only
+                        camDevices.push(mediaDevice);
+                    }
+                    else {
+                        //back and front
+                        camDevices.push(mediaDevice);
+                    }
+
+                    ctr++;
                 }
             });
             var select = document.getElementById("chooseCamSel");
-            select.style.display = "block";
+            select.style.visibility = "visible";
             var count = 0;
             //reverse array because some Android phones can't distinguish front and back cams at first load
             //and when this happens, most of the time, front cam goes first and back cam goes last
-            backCams = backCams.reverse();
-            backCams.forEach(mediaDevice => {
+            camDevices = camDevices.reverse();
+            camDevices.forEach(mediaDevice => {
                 const option = document.createElement('option');
                 option.value = mediaDevice.deviceId;
                 let label = `Camera ${count}`;
@@ -403,6 +595,7 @@
                 count++;
             });
             wTracker.WEBCAM_NAME = select.options[select.selectedIndex].innerHTML;
+            SelectCam();
         }
         function SelectCam() {
             var select = document.getElementById("chooseCamSel");
@@ -410,6 +603,104 @@
             window.WEBCAM_SETTINGS.video['deviceId'] = deviceId;
             //console.log(window.WEBCAM_SETTINGS);
             wTracker.WEBCAM_NAME = select.options[select.selectedIndex].innerHTML;
+
+            console.log("selecting camera index [" + select.selectedIndex + "] -> " + wTracker.WEBCAM_NAME);
+
+        }
+
+        async function FlipCam() {
+            arCamera.stopWebcam();
+            window.WEBCAM_SETTINGS.video.deviceId = '';
+
+            if (window.WEBCAM_SETTINGS.video.facingMode == 'user') {
+                window.WEBCAM_SETTINGS.video.facingMode = 'environment';
+                arCamera.setFlipped(false);
+            }
+            else {
+                window.WEBCAM_SETTINGS.video.facingMode = 'user';
+                arCamera.setFlipped(true);
+            }
+            window.webcamStream = await navigator.mediaDevices.getUserMedia(window.WEBCAM_SETTINGS);
+
+            const video = document.querySelector("#webcam-video");
+            video.srcObject = webcamStream;
+
+            await arCamera.startWebcam(video);
+        }
+
+        async function IsCameraPermissionGranted() {
+            if (!navigator.permissions || !navigator.mediaDevices) {
+                console.log("Permissions API or mediaDevices not supported.");
+                return false;
+            }
+
+            try {
+                // Query the status of the camera permission
+                const permissionStatus = await navigator.permissions.query({ name: "camera" });
+                if (permissionStatus.state === "granted") {
+                    console.log("Camera permission has already been granted.");
+                    return true;
+                } else if (permissionStatus.state === "prompt") {
+                    console.log("Camera permission is promptable.");
+                    return false;
+                } else {
+                    console.log("Camera permission has been denied.");
+                    return false;
+                }
+            } catch (error) {
+                console.log("Error checking camera permission:", error);
+                return false;
+            }
+        }
+
+        async function IsMotionSensorPermissionGranted() {
+            if (!navigator.permissions) {
+                console.log("Permissions API not supported.");
+                return false;
+            }
+
+            try {
+                // Query the status of the accelerometer permission
+                const permissionStatus = await navigator.permissions.query({ name: "accelerometer" });
+                if (permissionStatus.state === "granted") {
+                    console.log("Motion sensor permission has already been granted.");
+                    return true;
+                } else if (permissionStatus.state === "prompt") {
+                    console.log("Motion sensor permission is promptable.");
+                    return false;
+                } else {
+                    console.log("Motion sensor permission has been denied.");
+                    return false;
+                }
+            } catch (error) {
+                console.log("Error checking motion sensor permission:", error);
+                return false;
+            }
+        }
+
+        async function IsGPSPermissionGranted() {
+            if (!navigator.permissions) {
+                console.log("Permissions API not supported.");
+                return false;
+            }
+
+            try {
+                // Query the status of the geolocation permission
+                const permissionStatus = await navigator.permissions.query({ name: "geolocation" });
+                if (permissionStatus.state === "granted") {
+                    console.log("GPS permission has already been granted.");
+                    return true;
+                } else if (permissionStatus.state === "prompt") {
+                    console.log("GPS permission is promptable.");
+                    return false;
+                } else {
+                    console.log("GPS permission has been denied.");
+                    return false;
+                }
+            } catch (error) {
+                console.log("Error checking GPS permission:", error);
+                return false;
+            }
         }
 
         function StartMotionSensors() {
@@ -424,15 +715,113 @@
                 });
         }
 
+        function StartGPS() {
+            window.wTracker.startGPS()
+                .then((pos) => {
+                    console.log("GPS started", pos);
+                })
+                .catch(error => {
+                    console.error("Failed to start GPS - " + error);
+                    //ShowError("Failed to start GPS " + error);
+                });
+        }
+
         function ShowError(error) {
-            document.getElementById("errorDiv").style.display = "flex";
+            var errorDiv = document.getElementById("errorDiv");
+            errorDiv.style.opacity = 1;
+            errorDiv.style.visibility = "visible";
             document.getElementById("errorText").innerHTML = error;
         }
 
+        function ShowScreenshot(dataUrl) {
+            var screenshotDiv = document.getElementById("screenshotDiv");
+            screenshotDiv.style.opacity = 1;
+            screenshotDiv.style.visibility = "visible";
+
+            document.getElementById("screenshotImg").src = dataUrl;
+            document.getElementById("screenshotImg").style.width = "80vw";
+            document.getElementById("screenshotImg").style.height = 80 / window.innerWidth * window.innerHeight + "vw";
+        }
+
+        function HideScreenshot() {
+            var screenshotDiv = document.getElementById('screenshotDiv');
+            screenshotDiv.style.opacity = 0;
+            setTimeout(() => {
+                screenshotDiv.style.visibility = 'hidden';
+            }, 500);
+        }
+
+        function ShowConfirmUrl(url) {
+            var confirmUrlDiv = document.getElementById("confirmUrlDiv");
+            confirmUrlDiv.style.opacity = 1;
+            confirmUrlDiv.style.visibility = "visible";
+            window.newUrlString = url;
+            document.getElementById("confirmUrlText").innerText = "Are you sure you want to visit " + url + "?";
+        }
+
+        function HideConfirmUrl() {
+            var confirmUrlDiv = document.getElementById("confirmUrlDiv");
+            confirmUrlDiv.style.opacity = 0;
+            setTimeout(() => {
+                confirmUrlDiv.style.visibility = 'hidden';
+            }, 500);
+        }
+
+        const search = window.location.search.split("&")
+        const collection = search[0].slice(12)
+        const product = search[2].slice(8)?.replace("%20", " ")?.replace("@", "#")
+        const id = search[3].slice(3)
+        document.getElementById('screenshotButton').addEventListener('click', function () {
+            // Get references to the Unity canvas, video canvas, and container
+            const unityCanvas = document.querySelector("#unity-canvas");
+            const videoCanvas = document.querySelector("#video-canvas");
+            const container = document.getElementById('unity-container');
+            const originalZIndex = unityCanvas.style.zIndex;
+
+            unityCanvas.style.zIndex = "99999";
+            videoCanvas.style.zIndex = "-1";
+            // Create an output canvas to combine both
+            const outputCanvas = document.createElement('canvas');
+            const ctx = outputCanvas.getContext('2d', { alpha: true });
+
+            // Get the bounding box dimensions of the container
+            const containerRect = container.getBoundingClientRect();
+
+            // Set the output canvas size to match the container's size
+            outputCanvas.width = containerRect.width;
+            outputCanvas.height = containerRect.height;
+
+            // Calculate positions and sizes for video and Unity canvases
+            const videoRect = videoCanvas.getBoundingClientRect();
+            const unityRect = unityCanvas.getBoundingClientRect();
+
+            // Draw the video canvas (background)
+            ctx.drawImage(
+                videoCanvas,
+                videoRect.x - containerRect.x, // Adjust position relative to container
+                videoRect.y - containerRect.y,
+                videoRect.width,
+                videoRect.height
+            );
+
+            // Draw the Unity canvas (overlay)
+            ctx.drawImage(
+                unityCanvas,
+                unityRect.x - containerRect.x, // Adjust position relative to container
+                unityRect.y - containerRect.y,
+                unityRect.width,
+                unityRect.height
+            );
+
+            // Convert the combined canvas to a data URL
+            const dataUrl = outputCanvas.toDataURL("image/png");
+            unityCanvas.style.zIndex = originalZIndex;
+            downloadBase64Image(dataUrl, "YUGA_AR_" + collection + "_" + id + ".png");
+        });
+
+
 
         function downloadBase64Image(base64Data, filename) {
-            console.log(base64Data);
-
             const link = document.createElement('a');
             link.href = base64Data; // Base64 data
             link.download = filename; // Set the file name for download
@@ -441,12 +830,6 @@
             document.body.removeChild(link); // Clean up
         }
 
-
-        document.getElementById('screenshotButton').addEventListener('click', function () {
-            var canvas = document.querySelector("#unity-canvas");
-            var dataUrl = canvas.toDataURL("image/png");
-            downloadBase64Image(dataUrl, "dashbo.png");
-        });
         document.getElementById('resetBtn').addEventListener('click', function () {
             window.unityInstance.SendMessage(
                 "WorldTracker",
@@ -457,12 +840,107 @@
         let mediaRecorder;
         let recordedChunks = [];
 
-        document.getElementById('videoButton').addEventListener('click', function () {
-            var canvas = document.querySelector("#unity-canvas");
+        document.getElementById('videoButton').addEventListener('click', async function () {
+            const unityCanvas = document.querySelector("#unity-canvas");
+            const videoCanvas = document.querySelector("#video-canvas");
             const canvasWrapper = document.getElementById('recButton');
-            canvasWrapper.style.display = "flex"; // Add the red border
-            const videoStream = canvas.captureStream(); // Capture canvas stream
-            mediaRecorder = new MediaRecorder(videoStream);
+            canvasWrapper.style.display = "flex";
+
+
+            // Store original z-index
+            const originalZIndex = unityCanvas.style.zIndex;
+
+            // Temporarily adjust z-index for recording
+            unityCanvas.style.zIndex = "99999";
+            videoCanvas.style.zIndex = "-1";
+
+            // Get streams from both canvases
+            const unityStream = unityCanvas.captureStream(30);
+            const videoStream = videoCanvas.captureStream(30);
+
+            // Create canvas for combining streams
+            const outputCanvas = document.createElement('canvas');
+            const ctx = outputCanvas.getContext('2d', { alpha: true });
+
+            // Match the container size
+            const container = document.getElementById('unity-container');
+            outputCanvas.width = container.offsetWidth;
+            outputCanvas.height = container.offsetHeight;
+
+            // Create video elements to play the streams
+            const unityVideo = document.createElement('video');
+            const webcamVideo = document.createElement('video');
+
+            // Set up unity video
+            unityVideo.srcObject = unityStream;
+            unityVideo.playsInline = true;
+            unityVideo.muted = true;
+
+            // Set up webcam video
+            webcamVideo.srcObject = videoStream;
+            webcamVideo.playsInline = true;
+            webcamVideo.muted = true;
+
+            // Wait for both videos to be ready
+            await Promise.all([
+                unityVideo.play().catch(e => console.error('Unity video play failed:', e)),
+                webcamVideo.play().catch(e => console.error('Webcam video play failed:', e))
+            ]);
+
+            function drawFrame() {
+                ctx.clearRect(0, 0, outputCanvas.width, outputCanvas.height);
+
+                // Draw camera video to cover the entire canvas (background)
+                if (webcamVideo.readyState === 4) { // HAVE_ENOUGH_DATA
+                    ctx.drawImage(webcamVideo, 0, 0, outputCanvas.width, outputCanvas.height);
+                } else {
+                    console.warn('Webcam video is not ready');
+                }
+
+                // Draw Unity model on top of the camera video
+                if (unityVideo.readyState === 4) { // HAVE_ENOUGH_DATA
+                    ctx.drawImage(unityVideo, 0, 0, outputCanvas.width, outputCanvas.height);
+                } else {
+                    console.warn('Unity video is not ready');
+                }
+
+                if (mediaRecorder && mediaRecorder.state === "recording") {
+                    requestAnimationFrame(drawFrame);
+                }
+            }
+
+            function getSupportedMimeType() {
+                const possibleTypes = [
+                    'video/webm;codecs=vp8,opus',
+                    'video/webm;codecs=vp8',
+                    'video/webm',
+                    'video/mp4;codecs=h264',
+                    'video/mp4'
+                ];
+
+                return possibleTypes.find(type => MediaRecorder.isTypeSupported(type)) || '';
+            }
+
+            // Start recording the combined canvas
+            const stream = outputCanvas.captureStream(30);
+            const mimeType = getSupportedMimeType();
+
+            if (!mimeType) {
+                throw new Error('No supported MIME types found for recording');
+            }
+
+            const options = {
+                mimeType: mimeType,
+                videoBitsPerSecond: 2500000 // 2.5 Mbps
+            };
+            try {
+                mediaRecorder = new MediaRecorder(stream, options);
+            } catch (e) {
+                console.error('MediaRecorder creation failed:', e);
+                throw e;
+            }
+
+
 
             mediaRecorder.ondataavailable = function (e) {
                 if (e.data.size > 0) {
@@ -471,20 +949,65 @@
             };
 
             mediaRecorder.onstop = function () {
-                const blob = new Blob(recordedChunks, { type: "video/mp4" });
-                canvasWrapper.style.display = "none"; // Remove the red border
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'recording.mp4';
-                a.click();
-                URL.revokeObjectURL(url);
+                // Restore original z-index
+
+                unityCanvas.style.zIndex = originalZIndex;
+
+                canvasWrapper.style.display = "none";
+                unityVideo.pause();
+                webcamVideo.pause();
+
+                // Clean up video elements
+                unityVideo.srcObject = null;
+                webcamVideo.srcObject = null;
+
+                const blob = new Blob(recordedChunks, { type: "video/webm" });
+                const formData = new FormData();
+                formData.append("video", blob, "recording.webm");
+                const popup = document.getElementById("video-popup");
+                popup.style.display = "block";
+                fetch("https://twitter-backend-dot-inceptivestudio-370108.uc.r.appspot.com/convert", {
+                    method: "POST",
+                    body: formData,
+                })
+                    .then((response) => {
+                        if (!response.ok) {
+                            throw new Error(`Failed to upload video: ${response.status}`);
+                        }
+                        return response.blob();
+                    })
+                    .then((convertedBlob) => {
+                        const url = URL.createObjectURL(convertedBlob);
+                        const a = document.createElement('a');
+                        popup.style.display = "none";
+                        a.href = url;
+                        a.download = "YUGA_AR_" + collection + "_" + id + '.mp4';
+                        a.click();
+                        URL.revokeObjectURL(url);
+                    })
+                    .catch((error) => {
+                        console.error("Error during file upload or conversion:", error);
+                        popup.style.display = "none";
+                    });
+
+                recordedChunks = [];
             };
+
+            // Add event listeners for debugging
+            unityVideo.addEventListener('error', (e) => console.error('Unity video error:', e));
+            webcamVideo.addEventListener('error', (e) => console.error('Webcam video error:', e));
+
+            // Start recording
             mediaRecorder.start();
+            drawFrame();
+
             setTimeout(() => {
                 mediaRecorder.stop();
             }, 11000);
         });
+
+
+
     </script>
 </body>
 
