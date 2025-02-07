@@ -446,9 +446,22 @@
                                 window.unityInstance.SendMessage(
                                     "Manager",
                                     "ReceiveJsonValues",
-                                    JSON.stringify({
-                                        ...cleanedObject,
-                                    })
+                                    authNft?.id?.id === "Curtis" ?
+                                        JSON.stringify({
+                                            Clothes: "",
+                                            Earring: "",
+                                            Eyes: "",
+                                            Flipflop: "",
+                                            Fur: authNft?.id?.id,
+                                            Hat: "",
+                                            Mouth: "",
+                                            Unshaven: "",
+                                            Head: "",
+                                            ID: "",
+                                        }) :
+                                        JSON.stringify({
+                                            ...cleanedObject
+                                        })
                                 );
                             }
                             const videoBtn = document.getElementById('videoButton');
