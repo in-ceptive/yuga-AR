@@ -391,8 +391,8 @@
                         return cleanedObject;
                     };
                     const response = fetch(
-                        `https://storage.googleapis.com/3d-container/yuga/ARBuild/DashbobaycMeta.json`
-                        // `/DashbobaycMeta.json`
+                        `https://storage.googleapis.com/3d-container/yuga/ARBuild/DashbobaycMeta.json?time=${new Date().getDate()}`
+                        // `/DashbobaycMeta.json?time=${new Date().getDate()}`
                     )
                         .then((res) => res.json())
                         .then((metaArray) => {
