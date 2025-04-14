@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Unity WebGL Player | My project</title>
+    <title>Yuga AR Cam - DashBO</title>
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
     <link rel="manifest" href="manifest.webmanifest">
@@ -312,7 +312,8 @@
             const product = search[2].slice(8)?.replace("%20", " ")?.replace("@", "#")
             const id = search[3].slice(3)
             const auth = await fetch(
-                `https://bayccollection.ue.r.appspot.com/v1/getUidNft`, {
+                // `https://bayccollection.ue.r.appspot.com/v1/getUidNft`, {
+                `https://dev-default-dot-bayccollection.ue.r.appspot.com/v1/getUidNft`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -341,11 +342,11 @@
             }, 500);
 
             var buildUrl = "Build";
-            var loaderUrl = buildUrl + "/YugaBaycAR.loader.js";
+            var loaderUrl = buildUrl + `/YugaBaycAR.loader.js?time=${new Date().getMilliseconds()}`;
             var config = {
-                dataUrl: buildUrl + "/YugaBaycAR.data.unityweb",
-                frameworkUrl: buildUrl + "/YugaBaycAR.framework.js.unityweb",
-                codeUrl: buildUrl + "/YugaBaycAR.wasm.unityweb",
+                dataUrl: buildUrl + `/YugaBaycAR.data.unityweb?time=${new Date().getMilliseconds()}`,
+                frameworkUrl: buildUrl + `/YugaBaycAR.framework.js.unityweb?time=${new Date().getMilliseconds()}`,
+                codeUrl: buildUrl + `/YugaBaycAR.wasm.unityweb?time=${new Date().getMilliseconds()}`,
                 streamingAssetsUrl: "StreamingAssets",
                 companyName: "DefaultCompany",
                 productName: "My project",
@@ -390,9 +391,9 @@
                         }
                         return cleanedObject;
                     };
-                    const response = fetch(
-                        `https://storage.googleapis.com/3d-container/yuga/ARBuild/DashbobaycMeta.json?time=${new Date().getDate()}`
-                        // `/DashbobaycMeta.json?time=${new Date().getDate()}`
+                    fetch(
+                        collection === "boredapeyachtclub" ? `https://storage.googleapis.com/3d-container/yuga/baycMaycAR/final/DashbobaycMeta.json?time=${new Date().getMilliseconds()}` : `https://storage.googleapis.com/3d-container/yuga/baycMaycAR/final/DashboMaycMeta.json?time=${new Date().getMilliseconds()}`
+                        // collection === "boredapeyachtclub" ? `/DashbobaycMeta.json?time=${new Date().getMilliseconds()}` : `/DashboMaycMeta.json?time=${new Date().getMilliseconds()}`
                     )
                         .then((res) => res.json())
                         .then((metaArray) => {
@@ -402,23 +403,7 @@
 
                             console.log(cleanedObject, product, authNft?.id?.id, "asdaoschnsaoijsaiodsdsaiodjsidjsidojsdiojsdios");
                             if (collection === "mutant-ape-yacht-club") {
-                                cleanedObject.Clothes = ""
-                                cleanedObject.Earring = ""
-                                cleanedObject.Eyes = ""
-                                cleanedObject.Flipflop = ""
-                                cleanedObject.Fur = authNft?.id?.id
-                                cleanedObject.Hat = ""
-                                cleanedObject.Mouth = ""
-                                cleanedObject.Unshaven = ""
-                                cleanedObject.Head = ""
-                                cleanedObject.ID = ""
-                                window.unityInstance.SendMessage(
-                                    "Manager",
-                                    "ReceiveJsonValues",
-                                    JSON.stringify({
-                                        ...cleanedObject,
-                                    })
-                                );
+                                window.unityInstance.SendMessage("Manager", "IsMayc");
                             }
                             delete cleanedObject.ID;
                             cleanedObject.Background = "";
@@ -442,7 +427,7 @@
                                 );
                             }
 
-                            if (collection === "boredapeyachtclub") {
+                            if (collection === "boredapeyachtclub" || collection === "mutant-ape-yacht-club") {
                                 window.unityInstance.SendMessage(
                                     "Manager",
                                     "ReceiveJsonValues",
@@ -460,9 +445,24 @@
                                             "Unshaven": "0",
                                             "Flipflop": "New Punk Blue"
                                         }) :
-                                        JSON.stringify({
-                                            ...cleanedObject
-                                        })
+                                        authNft?.id?.id === "Murtis" ?
+                                            JSON.stringify({
+                                                "ID": "",
+                                                "Background": "",
+                                                "Clothes": "",
+                                                "Earring": "",
+                                                "Eyes": "",
+                                                "Head": "",
+                                                "Fur": "Murtis",
+                                                "Hat": "",
+                                                "Mouth": "",
+                                                "Unshaven": "",
+                                                "Flipflop": ""
+                                            })
+                                            :
+                                            JSON.stringify({
+                                                ...cleanedObject
+                                            })
                                 );
                             }
                             const videoBtn = document.getElementById('videoButton');
