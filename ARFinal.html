@@ -312,8 +312,9 @@
             const product = search[2].slice(8)?.replace("%20", " ")?.replace("@", "#")
             const id = search[3].slice(3)
             const auth = await fetch(
-                // `https://bayccollection.ue.r.appspot.com/v1/getUidNft`, {
-                `https://dev-default-dot-bayccollection.ue.r.appspot.com/v1/getUidNft`, {
+                // `http://localhost:3001/v1/getUidNft`, {
+                `https://node-api.dashbo.xyz/v1/getUidNft`, {
+                // `https://dev-default-dot-bayccollection.ue.r.appspot.com/v1/getUidNft`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -342,12 +343,12 @@
             }, 500);
 
             var buildUrl = "Build";
-            var loaderUrl = buildUrl + `/YugaBaycAR.loader.js?time=${new Date().getMilliseconds()}`;
+            var loaderUrl = buildUrl + `/${collection === "geez" ? "GeezAR" : "YugaBaycAR"}.loader.js?time=${new Date().getMilliseconds()}`;
             var config = {
-                dataUrl: buildUrl + `/YugaBaycAR.data.unityweb?time=${new Date().getMilliseconds()}`,
-                frameworkUrl: buildUrl + `/YugaBaycAR.framework.js.unityweb?time=${new Date().getMilliseconds()}`,
-                codeUrl: buildUrl + `/YugaBaycAR.wasm.unityweb?time=${new Date().getMilliseconds()}`,
-                streamingAssetsUrl: "StreamingAssets",
+                dataUrl: buildUrl + `/${collection === "geez" ? "GeezAR" : "YugaBaycAR"}.data.unityweb?time=${new Date().getMilliseconds()}`,
+                frameworkUrl: buildUrl + `/${collection === "geez" ? "GeezAR" : "YugaBaycAR"}.framework.js.unityweb?time=${new Date().getMilliseconds()}`,
+                codeUrl: buildUrl + `/${collection === "geez" ? "GeezAR" : "YugaBaycAR"}.wasm.unityweb?time=${new Date().getMilliseconds()}`,
+                streamingAssetsUrl: `${collection === "geez" ? "StreamingAssetsGeez" : "StreamingAssets"}`,
                 companyName: "DefaultCompany",
                 productName: "My project",
                 webglContextAttributes: { "preserveDrawingBuffer": true },
@@ -392,8 +393,8 @@
                         return cleanedObject;
                     };
                     fetch(
-                        collection === "boredapeyachtclub" ? `https://storage.googleapis.com/3d-container/yuga/baycMaycAR/final/DashbobaycMeta.json?time=${new Date().getMilliseconds()}` : `https://storage.googleapis.com/3d-container/yuga/baycMaycAR/final/DashboMaycMeta.json?time=${new Date().getMilliseconds()}`
-                        // collection === "boredapeyachtclub" ? `/DashbobaycMeta.json?time=${new Date().getMilliseconds()}` : `/DashboMaycMeta.json?time=${new Date().getMilliseconds()}`
+                        collection === "boredapeyachtclub" ? `https://storage.googleapis.com/3d-container/yuga/baycMaycAR/final/DashbobaycMeta.json?time=${new Date().getMilliseconds()}` : collection === "geez" ? `https://storage.googleapis.com/3d-container/yuga/baycMaycAR/final/GeezJson.json?time=${new Date().getMilliseconds()}` : `https://storage.googleapis.com/3d-container/yuga/baycMaycAR/final/DashboMaycMeta.json?time=${new Date().getMilliseconds()}`
+                        // collection === "boredapeyachtclub" ? `/DashbobaycMeta.json?time=${new Date().getMilliseconds()}` : collection === "geez" ? `/GeezJson.json?time=${new Date().getMilliseconds()}` : `/DashboMaycMeta.json?time=${new Date().getMilliseconds()}`
                     )
                         .then((res) => res.json())
                         .then((metaArray) => {
@@ -427,7 +428,7 @@
                                 );
                             }
 
-                            if (collection === "boredapeyachtclub" || collection === "mutant-ape-yacht-club") {
+                            if (collection === "boredapeyachtclub" || collection === "mutant-ape-yacht-club" || collection === "geez") {
                                 window.unityInstance.SendMessage(
                                     "Manager",
                                     "ReceiveJsonValues",
